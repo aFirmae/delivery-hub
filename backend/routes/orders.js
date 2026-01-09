@@ -73,6 +73,7 @@ router.get('/', auth, async (req, res) => {
         const filters = {};
         if(req.query.status) filters.status = req.query.status;
         if(req.query.limit) filters.limit = req.query.limit;
+        if(req.query.type) filters.type = req.query.type;
         
         // Sender sees own, others (Delivery Partner) see all
         if(req.user.user_type === 'sender') {
@@ -124,6 +125,32 @@ router.put('/:id/status', auth, async (req, res) => {
              res.status(400).json({ message: 'Update failed' });
         }
 
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Cancel Order
+router.put('/:id/cancel', auth, async (req, res) => {
+    try {
+        const order = await Order.findById(req.params.id);
+        if(!order) {
+            return res.status(404).json({ message: 'Order not found' });
+        }
+
+        if(req.user.user_type === 'sender') {
+            if (req.user.id !== order.sender_id) {
+                return res.status(403).json({ message: 'Access denied' });
+            }
+        }
+
+        const success = await Order.cancel(req.params.id);
+        if(success) {
+            res.json({ id: req.params.id, status: 'cancelled', message: 'Order cancelled successfully' });
+        } else {
+             res.status(400).json({ message: 'Cancellation failed. Order might not be pending.' });
+        }
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server error' });

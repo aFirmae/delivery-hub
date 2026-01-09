@@ -19,27 +19,31 @@ class Order {
     let query = 'SELECT * FROM orders';
     const params = [];
     
+    const conditions = [];
+
     if (filters.sender_id) {
-      query += ' WHERE sender_id = ?';
+      conditions.push('sender_id = ?');
       params.push(filters.sender_id);
-    } else {
-        // If filters exist but not sender_id, we need to handle WHERE clause correctly
-        // For simplicity in this scope, let's assume if there are other filters we append with AND/WHERE
-        // But the requirement says: "Admin sees all; users see only their own."
-        // We will handle logic in controller/route
     }
     
-    // Simple implementation for list orders
-    if (Object.keys(filters).length > 0) {
-        if(!query.includes('WHERE')) query += ' WHERE 1=1';
-        if(filters.status) {
-            query += ' AND status = ?';
-            params.push(filters.status);
-        }
-        if(filters.limit) {
-             query += ' LIMIT ?';
-             params.push(parseInt(filters.limit));
-        }
+    if (filters.type === 'active') {
+        conditions.push("status IN ('pending', 'assigned', 'in_transit')");
+    } else if (filters.type === 'history') {
+        conditions.push("status IN ('delivered', 'cancelled')");
+    } else if(filters.status) {
+        conditions.push('status = ?');
+        params.push(filters.status);
+    }
+
+    if (conditions.length > 0) {
+      query += ' WHERE ' + conditions.join(' AND ');
+    }
+    
+    query += ' ORDER BY created_at DESC';
+
+    if(filters.limit) {
+         query += ' LIMIT ?';
+         params.push(parseInt(filters.limit));
     }
 
     const [rows] = await db.execute(query, params);
@@ -61,6 +65,11 @@ class Order {
       
       const [result] = await db.execute(query, params);
       return result.affectedRows > 0;
+  }
+
+  static async cancel(id) {
+    const [result] = await db.execute("UPDATE orders SET status = 'cancelled' WHERE id = ? AND status = 'pending'", [id]);
+    return result.affectedRows > 0;
   }
 }
 

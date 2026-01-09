@@ -1,89 +1,185 @@
-import React, { useContext, useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import React, { useState, useContext } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, Image, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { AuthContext } from '../contexts/AuthContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Feather } from '@expo/vector-icons';
 
 const LoginScreen = ({ navigation }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const { login, isLoading } = useContext(AuthContext);
+	const [email, setEmail] = useState('');
+	const [password, setPassword] = useState('');
+	const { login, isLoading } = useContext(AuthContext);
 
-  const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert("Error", "Please fill in all fields");
-      return;
-    }
-    try {
-      await login(email, password);
-    } catch (e) {
-      Alert.alert("Login Failed", "Invalid credentials or network error");
-    }
-  };
+    const handleLogin = async () => {
+        if(!email || !password) {
+            Alert.alert('Error', 'Please fill in all fields');
+            return;
+        }
+        await login(email, password);
+    };
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.wrapper}>
-        <Text style={styles.title}>Delivery Hub</Text>
-        <TextInput
-          style={styles.input}
-          value={email}
-          placeholder="Email"
-          onChangeText={text => setEmail(text)}
-          autoCapitalize="none"
-        />
-        <TextInput
-          style={styles.input}
-          value={password}
-          placeholder="Password"
-          onChangeText={text => setPassword(text)}
-          secureTextEntry
-        />
+	return (
+		<SafeAreaView style={styles.container}>
+            <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                style={{ flex: 1 }}
+            >
+                <ScrollView contentContainerStyle={styles.scroll}>
+                    <View style={styles.logoContainer}>
+                        <View style={styles.logoCircle}>
+                            <Feather name="box" size={40} color="white" />
+                        </View>
+                        <Text style={styles.appName}>Delivery Hub</Text>
+                        <Text style={styles.tagline}>Fast. Reliable. Secure.</Text>
+                    </View>
+                    
+                    <View style={styles.formContainer}>
+                        <Text style={styles.welcomeText}>Welcome Back!</Text>
+                        
+                        <View style={styles.inputContainer}>
+                            <Feather name="mail" size={20} color="#666" style={styles.icon} />
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Email"
+                                value={email}
+                                onChangeText={setEmail}
+                                autoCapitalize="none"
+                                keyboardType="email-address"
+                            />
+                        </View>
 
-        {isLoading ? (
-          <ActivityIndicator size="large" color="#0000ff" />
-        ) : (
-          <Button title="Login" onPress={handleLogin} />
-        )}
+                        <View style={styles.inputContainer}>
+                            <Feather name="lock" size={20} color="#666" style={styles.icon} />
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Password"
+                                value={password}
+                                onChangeText={setPassword}
+                                secureTextEntry
+                            />
+                        </View>
 
-        <View style={{ flexDirection: 'row', marginTop: 20 }}>
-          <Text>Don't have an account? </Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-            <Text style={styles.link}>Register</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </SafeAreaView>
-  );
+                        <TouchableOpacity 
+                            style={styles.button} 
+                            onPress={handleLogin}
+                            disabled={isLoading}
+                        >
+                            {isLoading ? (
+                                <ActivityIndicator color="white" />
+                            ) : (
+                                <Text style={styles.buttonText}>Login</Text>
+                            )}
+                        </TouchableOpacity>
+
+                        <View style={styles.footer}>
+                            <Text style={styles.footerText}>Don't have an account? </Text>
+                            <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+                                <Text style={styles.link}>Sign Up</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </ScrollView>
+			</KeyboardAvoidingView>
+		</SafeAreaView>
+	);
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  wrapper: {
-    width: '80%',
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 30,
-  },
-  input: {
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#bbb',
-    borderRadius: 5,
-    paddingHorizontal: 14,
-    width: '100%',
-    height: 45,
-    backgroundColor: 'white'
-  },
-  link: {
-    color: 'blue',
-  },
+	container: {
+		flex: 1,
+		backgroundColor: '#fff',
+	},
+    scroll: {
+        flexGrow: 1,
+        justifyContent: 'center',
+        padding: 20
+    },
+    logoContainer: {
+        alignItems: 'center',
+        marginBottom: 40
+    },
+    logoCircle: {
+        width: 80,
+        height: 80,
+        backgroundColor: '#007AFF',
+        borderRadius: 40,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 15,
+        elevation: 10,
+        shadowColor: '#007AFF',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.4,
+        shadowRadius: 10
+    },
+    appName: {
+        fontSize: 28,
+        fontWeight: 'bold',
+        color: '#1a1a1a',
+        marginBottom: 5
+    },
+    tagline: {
+        fontSize: 16,
+        color: '#666'
+    },
+    formContainer: {
+        width: '100%'
+    },
+    welcomeText: {
+        fontSize: 22,
+        fontWeight: 'bold',
+        color: '#333',
+        marginBottom: 20
+    },
+    inputContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#f8f9fa',
+        borderWidth: 1,
+        borderColor: '#e9ecef',
+        borderRadius: 12,
+        marginBottom: 15,
+        paddingHorizontal: 15
+    },
+    icon: {
+        marginRight: 10
+    },
+    input: {
+        flex: 1,
+        paddingVertical: 15,
+        fontSize: 16,
+        color: '#1a1a1a'
+    },
+    button: {
+        backgroundColor: '#007AFF',
+        padding: 18,
+        borderRadius: 12,
+        alignItems: 'center',
+        marginTop: 10,
+        elevation: 5,
+        shadowColor: '#007AFF',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8
+    },
+    buttonText: {
+        color: 'white',
+        fontWeight: 'bold',
+        fontSize: 18
+    },
+    footer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        marginTop: 20
+    },
+    footerText: {
+        color: '#666',
+        fontSize: 15
+    },
+    link: {
+        color: '#007AFF',
+        fontWeight: 'bold',
+        fontSize: 15
+    }
 });
 
 export default LoginScreen;
