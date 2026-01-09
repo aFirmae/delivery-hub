@@ -1,0 +1,55 @@
+# General
+.DS_Store
+*.pem
+.env
+.env.local
+.env.*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Dependencies
+node_modules/
+
+# Logs
+logs/
+*.log
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage
+lib-cov
+coverage
+*.lcov
+.nyc_output
+
+# Mobile - Expo
+.expo/
+dist/
+mobile/web-build/
+mobile/expo-env.d.ts
+
+# Mobile - Native
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+
+# Mobile - Metro
+.metro-health-check*
+
+# Mobile - TypeScript
+*.tsbuildinfo
+
+# Mobile - Generated Native Folders
+mobile/ios/
+mobile/android/
+mobile/.kotlin/
+
+# Backend
+backend/input_data/
+backend/test/
