@@ -25,6 +25,15 @@ class User {
     const [rows] = await db.execute('SELECT * FROM users WHERE id = ?', [id]);
     return rows[0];
   }
+
+  static async update(id, data) {
+      const { name, phone } = data;
+      const [result] = await db.execute(
+          'UPDATE users SET name = ?, phone = ? WHERE id = ?',
+          [name, phone, id]
+      );
+      return true; // Return true if no error occurred, even if affectedRows is 0 (no changes)
+  }
 }
 
 module.exports = User;

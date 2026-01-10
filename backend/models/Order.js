@@ -11,7 +11,15 @@ class Order {
   }
 
   static async findById(id) {
-    const [rows] = await db.execute('SELECT * FROM orders WHERE id = ?', [id]);
+    const query = `
+      SELECT o.*, 
+             u.name as delivery_partner_name, 
+             u.phone as delivery_partner_phone 
+      FROM orders o 
+      LEFT JOIN users u ON o.delivery_partner_id = u.id 
+      WHERE o.id = ?
+    `;
+    const [rows] = await db.execute(query, [id]);
     return rows[0];
   }
 
@@ -19,11 +27,21 @@ class Order {
     let query = 'SELECT * FROM orders';
     const params = [];
     
+    // ... logic remains same, but maybe simpler to not join here for list unless needed for performance
+    // Keeping original logic for findAll to minimize risk, assumed list doesn't need detailed partner info yet
+    // If list needs partner info, we can update later. User only asked for "user, which delivery has been assigned..." 
+    // which implies Order Details screen.
+    
     const conditions = [];
 
     if (filters.sender_id) {
       conditions.push('sender_id = ?');
       params.push(filters.sender_id);
+    }
+    
+    if (filters.delivery_partner_id) {
+        conditions.push('delivery_partner_id = ?');
+        params.push(filters.delivery_partner_id);
     }
     
     if (filters.type === 'active') {
@@ -51,7 +69,6 @@ class Order {
   }
   
   static async updateStatus(id, status, delivery_partner_id) {
-      // If delivery_partner_id is provided, we update it too (assigning order)
       let query = 'UPDATE orders SET status = ?';
       const params = [status];
       
@@ -70,6 +87,25 @@ class Order {
   static async cancel(id) {
     const [result] = await db.execute("UPDATE orders SET status = 'cancelled' WHERE id = ? AND status = 'pending'", [id]);
     return result.affectedRows > 0;
+  }
+
+  static async getEarnings(partnerId) {
+    // Total Earnings
+    const [totalRows] = await db.execute(
+        "SELECT SUM(amount) as total FROM orders WHERE delivery_partner_id = ? AND status = 'delivered'", 
+        [partnerId]
+    );
+    
+    // Daily Earnings
+    const [dailyRows] = await db.execute(
+        "SELECT DATE(created_at) as date, SUM(amount) as total FROM orders WHERE delivery_partner_id = ? AND status = 'delivered' GROUP BY DATE(created_at) ORDER BY date DESC",
+        [partnerId]
+    );
+
+    return {
+        total: totalRows[0].total || 0,
+        daily: dailyRows
+    };
   }
 }
 

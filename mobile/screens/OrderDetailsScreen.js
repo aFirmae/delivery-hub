@@ -150,11 +150,35 @@ const OrderDetailsScreen = ({ route, navigation }) => {
 
                     <View style={styles.locationRow}>
                          <View style={[styles.dot, { backgroundColor: '#FF3B30' }]} />
-                         <View style={styles.locationTextContainer}>
-                             <Text style={styles.locationLabel}>Drop-off</Text>
-                             <Text style={styles.address}>{order.delivery_address}</Text>
-                         </View>
+                         <View style={styles.detailRow}>
+							<Feather name="map-pin" size={20} color="#666" style={styles.icon} />
+							<View style={styles.detailTextContainer}>
+								<Text style={styles.detailLabel}>Delivery Address</Text>
+								<Text style={styles.detailValue}>{order.delivery_address}</Text>
+							</View>
+						</View>
                     </View>
+
+                        {/* Delivery Partner Info - For Senders */}
+                        {userInfo.user_type === 'sender' && order.delivery_partner_id && (
+                             <View style={styles.partnerSection}>
+                                <Text style={styles.sectionTitle}>Delivery Agent</Text>
+                                <View style={styles.partnerCard}>
+                                    <View style={styles.partnerAvatar}>
+                                        <Text style={styles.partnerAvatarText}>
+                                            {order.delivery_partner_name?.charAt(0).toUpperCase() || 'D'}
+                                        </Text>
+                                    </View>
+                                    <View style={styles.partnerInfo}>
+                                        <Text style={styles.partnerName}>{order.delivery_partner_name || 'Delivery Partner'}</Text>
+                                        <Text style={styles.partnerPhone}>{order.delivery_partner_phone || 'No phone number'}</Text>
+                                    </View>
+                                    <TouchableOpacity style={styles.callButton}>
+                                        <Feather name="phone" size={20} color="white" />
+                                    </TouchableOpacity>
+                                </View>
+                             </View>
+                        )}
                 </View>
 
                 {/* Actions */}
@@ -330,6 +354,59 @@ const styles = StyleSheet.create({
         color: 'white',
         fontWeight: 'bold',
         fontSize: 16
+    },
+    partnerSection: {
+        marginTop: 20,
+        borderTopWidth: 1,
+        borderTopColor: '#f0f0f0',
+        paddingTop: 15
+    },
+    sectionTitle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#1a1a1a',
+        marginBottom: 10
+    },
+    partnerCard: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#f8f9fa',
+        padding: 10,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: '#eee'
+    },
+    partnerAvatar: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: '#007AFF',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 12
+    },
+    partnerAvatarText: {
+        color: 'white',
+        fontWeight: 'bold',
+        fontSize: 16
+    },
+    partnerInfo: {
+        flex: 1
+    },
+    partnerName: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#1a1a1a'
+    },
+    partnerPhone: {
+        fontSize: 14,
+        color: '#666',
+        marginTop: 2
+    },
+    callButton: {
+        backgroundColor: '#4CD964',
+        padding: 10,
+        borderRadius: 20
     }
 });
 

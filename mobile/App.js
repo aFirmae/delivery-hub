@@ -17,6 +17,8 @@ import CreateOrderScreen from './screens/CreateOrderScreen';
 import OrderDetailsScreen from './screens/OrderDetailsScreen';
 import HistoryScreen from './screens/HistoryScreen';
 import ProfileScreen from './screens/ProfileScreen';
+import EditProfileScreen from './screens/EditProfileScreen';
+import DailyEarningsScreen from './screens/DailyEarningsScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -95,6 +97,8 @@ const AppNavigator = () => {
                             }}
                         />
                         <Stack.Screen name="OrderDetails" component={OrderDetailsScreen} />
+                        <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+                        <Stack.Screen name="DailyEarnings" component={DailyEarningsScreen} />
                     </>
                 ) : (
                     <>

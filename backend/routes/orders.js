@@ -157,4 +157,19 @@ router.put('/:id/cancel', auth, async (req, res) => {
     }
 });
 
+// Get Earnings (for delivery partners)
+router.get('/partner/earnings', auth, async (req, res) => {
+    try {
+        if(req.user.user_type !== 'delivery_partner') {
+             return res.status(403).json({ message: 'Access denied' });
+        }
+        
+        const earnings = await Order.getEarnings(req.user.id);
+        res.json(earnings);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 module.exports = router;

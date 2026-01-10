@@ -78,6 +78,7 @@ router.post('/login', async (req, res) => {
       id: user.id,
       email: user.email,
       name: user.name,
+      phone: user.phone,
       token,
       user_type: user.user_type
     });
@@ -85,6 +86,34 @@ router.post('/login', async (req, res) => {
     console.error(error);
     res.status(500).json({ message: 'Server error' });
   }
+});
+
+const auth = require('../middleware/auth');
+
+// Update Profile
+router.put('/profile', auth, async (req, res) => {
+    try {
+        const { name, phone } = req.body;
+        
+        const success = await User.update(req.user.id, { name, phone });
+        if(success) {
+            // Fetch updated user to return
+            const updatedUser = await User.findById(req.user.id);
+             res.json({
+                id: updatedUser.id,
+                email: updatedUser.email,
+                name: updatedUser.name,
+                phone: updatedUser.phone,
+                user_type: updatedUser.user_type,
+                message: 'Profile updated successfully'
+            });
+        } else {
+            res.status(400).json({ message: 'Update failed' });
+        }
+    } catch (error) {
+         console.error(error);
+         res.status(500).json({ message: 'Server error' });
+    }
 });
 
 module.exports = router;
