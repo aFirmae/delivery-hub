@@ -28,10 +28,19 @@ router.post('/register', async (req, res) => {
       user_type: user_type || 'sender'
     });
 
+    const token = jwt.sign(
+      { id: userId, email, user_type: user_type || 'sender' },
+      process.env.JWT_SECRET,
+      { expiresIn: '2h' }
+    );
+
     res.status(201).json({
       id: userId,
       email,
       name,
+      phone,
+      user_type: user_type || 'sender',
+      token,
       message: 'User registered successfully'
     });
   } catch (error) {

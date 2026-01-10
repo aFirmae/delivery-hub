@@ -3,11 +3,17 @@ const db = require('../db/db');
 class User {
   static async create(user) {
     const { email, password, name, phone, user_type } = user;
+    
+    // Generate custom ID: USR + Random(5 chars) + Timestamp
+    const randomStr = Math.random().toString(36).substring(2, 7).toUpperCase();
+    const timestamp = Date.now().toString();
+    const id = `USR${randomStr}${timestamp}`;
+
     const [result] = await db.execute(
-      'INSERT INTO users (email, password, name, phone, user_type) VALUES (?, ?, ?, ?, ?)',
-      [email, password, name, phone, user_type]
+      'INSERT INTO users (id, email, password, name, phone, user_type) VALUES (?, ?, ?, ?, ?, ?)',
+      [id, email, password, name, phone, user_type]
     );
-    return result.insertId;
+    return id;
   }
 
   static async findByEmail(email) {

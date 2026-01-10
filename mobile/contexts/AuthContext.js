@@ -31,14 +31,21 @@ export const AuthProvider = ({ children }) => {
   const register = async (name, email, password, phone, user_type) => {
     setIsLoading(true);
     try {
-      await client.post('/auth/register', { 
+      const response = await client.post('/auth/register', { 
         name, email, password, phone, user_type 
       });
-      // After register, user usually needs to login or we auto-login
-      // For now just return success
+
+      // Auto-login after register
+      const { token, ...user } = response.data;
+      
+      setUserToken(token);
+      setUserInfo(user);
+      
+      await AsyncStorage.setItem('token', token);
+      await AsyncStorage.setItem('userInfo', JSON.stringify(user));
     } catch (error) {
       console.log('Register error', error);
-      throw error;
+      throw error; // Rethrow to let the component handle UI feedback
     } finally {
       setIsLoading(false);
     }

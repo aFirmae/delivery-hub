@@ -69,51 +69,51 @@ const MainTabs = () => {
 };
 
 const AppNavigator = () => {
-  const { userInfo, splashLoading } = useContext(AuthContext);
+    const { userInfo, splashLoading } = useContext(AuthContext);
 
-  if (splashLoading) {
+    if (splashLoading) {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <ActivityIndicator size="large" color="#0000ff" />
+            </View>
+        );
+    }
+
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#0000ff" />
-      </View>
+        <NavigationContainer>
+            <Stack.Navigator screenOptions={{ headerShown: false }}>
+                {userInfo ? (
+                    <>
+                        <Stack.Screen name="MainTabs" component={MainTabs} />
+                        <Stack.Screen
+                            name="CreateOrder"
+                            component={CreateOrderScreen}
+                            options={{
+                                headerShown: true,
+                                title: 'Create Order',
+                                headerBackTitleVisible: false,
+                            }}
+                        />
+                        <Stack.Screen name="OrderDetails" component={OrderDetailsScreen} />
+                    </>
+                ) : (
+                    <>
+                        <Stack.Screen name="Login" component={LoginScreen} />
+                        <Stack.Screen name="Register" component={RegisterScreen} />
+                    </>
+                )}
+            </Stack.Navigator>
+        </NavigationContainer>
     );
-  }
-
-  return (
-    <NavigationContainer>
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
-            {userInfo ? (
-                <>
-                    <Stack.Screen name="MainTabs" component={MainTabs} />
-                    <Stack.Screen 
-                        name="CreateOrder" 
-                        component={CreateOrderScreen} 
-                        options={{ 
-                            headerShown: true, 
-                            title: 'Create Order',
-                            headerBackTitleVisible: false,
-                        }} 
-                    />
-                    <Stack.Screen name="OrderDetails" component={OrderDetailsScreen} />
-                </>
-            ) : (
-                <>
-                    <Stack.Screen name="Login" component={LoginScreen} />
-                    <Stack.Screen name="Register" component={RegisterScreen} />
-                </>
-            )}
-        </Stack.Navigator>
-    </NavigationContainer>
-  );
 };
 
 export default function App() {
-  return (
-    <SafeAreaProvider>
-        <AuthProvider>
-            <StatusBar style="auto" />
-            <AppNavigator />
-        </AuthProvider>
-    </SafeAreaProvider>
-  );
+    return (
+        <SafeAreaProvider>
+            <AuthProvider>
+                <StatusBar style="auto" />
+                <AppNavigator />
+            </AuthProvider>
+        </SafeAreaProvider>
+    );
 }

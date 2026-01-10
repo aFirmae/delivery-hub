@@ -10,14 +10,43 @@ const RegisterScreen = ({ navigation }) => {
 	const [phone, setPhone] = useState('');
 	const [password, setPassword] = useState('');
 	const [userType, setUserType] = useState('sender');
+    const [passwordVisible, setPasswordVisible] = useState(false);
+    const [errors, setErrors] = useState({});
+    const [generalError, setGeneralError] = useState('');
 	const { register, isLoading } = useContext(AuthContext);
 
+    const validate = () => {
+        let valid = true;
+        let tempErrors = {};
+
+        if (!name) { tempErrors.name = 'Name is required'; valid = false; }
+        if (!email) { tempErrors.email = 'Email is required'; valid = false; }
+        else if (!/\S+@\S+\.\S+/.test(email)) { tempErrors.email = 'Email is invalid'; valid = false; }
+        
+        if (!phone) { tempErrors.phone = 'Phone is required'; valid = false; }
+        else if (phone.length < 10) { tempErrors.phone = 'Phone number must be at least 10 digits'; valid = false; }
+
+        if (!password) { tempErrors.password = 'Password is required'; valid = false; }
+        else if (password.length < 6) { tempErrors.password = 'Password must be at least 6 characters'; valid = false; }
+
+        setErrors(tempErrors);
+        return valid;
+    };
+
     const handleRegister = async () => {
-        if(!name || !email || !password || !phone) {
-             Alert.alert('Error', 'Please fill in all fields');
-             return;
+        setGeneralError('');
+        if (!validate()) return;
+
+        try {
+            await register(name, email, password, phone, userType);
+             // Navigation handled by AuthContext
+        } catch (error) {
+             if (error.response?.status === 409) {
+                 setGeneralError('Email is already registered. Please login.');
+             } else {
+                 setGeneralError('Registration failed. Please try again.');
+             }
         }
-        await register(name, email, phone, password, userType);
     };
 
 	return (
@@ -36,6 +65,8 @@ const RegisterScreen = ({ navigation }) => {
                     </View>
 
                     <View style={styles.formContainer}>
+                        {generalError ? <Text style={styles.errorText}>{generalError}</Text> : null}
+
                         <View style={styles.inputContainer}>
                              <Feather name="user" size={20} color="#666" style={styles.icon} />
                             <TextInput
@@ -45,6 +76,7 @@ const RegisterScreen = ({ navigation }) => {
                                 onChangeText={setName}
                             />
                         </View>
+                        {errors.name && <Text style={styles.fieldError}>{errors.name}</Text>}
 
                         <View style={styles.inputContainer}>
                              <Feather name="mail" size={20} color="#666" style={styles.icon} />
@@ -57,6 +89,7 @@ const RegisterScreen = ({ navigation }) => {
                                 keyboardType="email-address"
                             />
                         </View>
+                        {errors.email && <Text style={styles.fieldError}>{errors.email}</Text>}
                         
                         <View style={styles.inputContainer}>
                              <Feather name="phone" size={20} color="#666" style={styles.icon} />
@@ -68,6 +101,7 @@ const RegisterScreen = ({ navigation }) => {
                                 keyboardType="phone-pad"
                             />
                         </View>
+                        {errors.phone && <Text style={styles.fieldError}>{errors.phone}</Text>}
 
                         <View style={styles.inputContainer}>
                              <Feather name="lock" size={20} color="#666" style={styles.icon} />
@@ -76,9 +110,13 @@ const RegisterScreen = ({ navigation }) => {
                                 placeholder="Password"
                                 value={password}
                                 onChangeText={setPassword}
-                                secureTextEntry
+                                secureTextEntry={!passwordVisible}
                             />
+                             <TouchableOpacity onPress={() => setPasswordVisible(!passwordVisible)}>
+                                <Feather name={passwordVisible ? "eye" : "eye-off"} size={20} color="#666" />
+                            </TouchableOpacity>
                         </View>
+                         {errors.password && <Text style={styles.fieldError}>{errors.password}</Text>}
 
                         <Text style={styles.label}>I want to be a:</Text>
                         <View style={styles.typeContainer}>
@@ -159,7 +197,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#e9ecef',
         borderRadius: 12,
-        marginBottom: 15,
+        marginBottom: 5, // Reduced margin to keep error close
         paddingHorizontal: 15
     },
     icon: {
@@ -239,10 +277,28 @@ const styles = StyleSheet.create({
         color: '#666',
         fontSize: 15
     },
-    link: {
-        color: '#007AFF',
-        fontWeight: 'bold',
-        fontSize: 15
+    	link: {
+		color: '#007AFF',
+		fontWeight: 'bold',
+		fontSize: 15
+	},
+    errorText: {
+        color: '#D32F2F',
+        marginBottom: 15,
+        fontSize: 14,
+        fontWeight: '600',
+        textAlign: 'center',
+        backgroundColor: '#FFEBEE',
+        padding: 10,
+        borderRadius: 8
+    },
+    fieldError: {
+        color: '#D32F2F',
+        fontSize: 12,
+        marginBottom: 15, // Push next input down
+        marginTop: 2,
+        marginLeft: 5,
+        fontWeight: '500'
     }
 });
 

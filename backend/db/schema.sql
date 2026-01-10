@@ -2,7 +2,7 @@ CREATE DATABASE IF NOT EXISTS delivery_hub;
 USE delivery_hub;
 
 CREATE TABLE IF NOT EXISTS users (
-  id INT PRIMARY KEY AUTO_INCREMENT,
+  id VARCHAR(50) PRIMARY KEY,
   email VARCHAR(255) UNIQUE NOT NULL,
   password VARCHAR(255) NOT NULL,
   name VARCHAR(255) NOT NULL,
@@ -13,8 +13,8 @@ CREATE TABLE IF NOT EXISTS users (
 
 CREATE TABLE IF NOT EXISTS orders (
   id INT PRIMARY KEY AUTO_INCREMENT,
-  sender_id INT NOT NULL,
-  delivery_partner_id INT,
+  sender_id VARCHAR(50) NOT NULL,
+  delivery_partner_id VARCHAR(50),
   package_description VARCHAR(500),
   pickup_address VARCHAR(500) NOT NULL,
   delivery_address VARCHAR(500) NOT NULL,
