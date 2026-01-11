@@ -18,6 +18,11 @@ const EditProfileScreen = ({ navigation }) => {
             return;
         }
 
+        if (!/^\d{10}$/.test(phone)) {
+            Alert.alert('Error', 'Phone number must be exactly 10 digits');
+            return;
+        }
+
         setLoading(true);
         try {
             const response = await client.put('/auth/profile', { name, phone });

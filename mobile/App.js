@@ -10,8 +10,6 @@ import { Feather } from '@expo/vector-icons';
 
 import LoginScreen from './screens/LoginScreen';
 import RegisterScreen from './screens/RegisterScreen';
-
-// Screens
 import HomeScreen from './screens/HomeScreen';
 import CreateOrderScreen from './screens/CreateOrderScreen';
 import OrderDetailsScreen from './screens/OrderDetailsScreen';
