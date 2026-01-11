@@ -47,9 +47,6 @@ router.get('/:id', auth, async (req, res) => {
             return res.status(404).json({ message: 'Order not found' });
         }
 
-        // Authorization check: User must be sender, admin, or assigned partner
-        // allowing all authenticated users to view for simplicity unless strict privacy needed
-        // Requirement: "Admin sees all; users see only their own."
         // Authorization check: 
         // 1. Sender can see their own
         // 2. Delivery Partner can see all

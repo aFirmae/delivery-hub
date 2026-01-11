@@ -1,12 +1,12 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity, Alert, Linking } from 'react-native';
 import client from '../api/client';
 import { AuthContext } from '../contexts/AuthContext';
 import { Feather } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const OrderDetailsScreen = ({ route, navigation }) => {
-    const { orderId } = route.params;
+    const { orderId, displayId } = route.params;
     const { userInfo } = useContext(AuthContext);
     const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -50,15 +50,15 @@ const OrderDetailsScreen = ({ route, navigation }) => {
             ]
         );
     };
-    
+
     // Function to handle status update for Delivery Partners
     const updateStatus = async (newStatus) => {
         try {
             await client.put(`/orders/${orderId}/status`, {
                 status: newStatus,
-                delivery_partner_id: userInfo.id 
+                delivery_partner_id: userInfo.id
             });
-            Alert.alert("Success", `Order ${newStatus}`);
+            Alert.alert("Success", `Order ${newStatus.replace('_', ' ').toLowerCase()}`);
             fetchOrderDetails();
         } catch (error) {
             Alert.alert("Error", "Failed to update status");
@@ -106,12 +106,12 @@ const OrderDetailsScreen = ({ route, navigation }) => {
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
                     <Feather name="arrow-left" size={24} color="#1a1a1a" />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Order #{order.id}</Text>
+                <Text style={styles.headerTitle}>Order #{displayId || 'Details'}</Text>
                 <View style={{ width: 24 }} />
             </View>
 
             <ScrollView contentContainerStyle={styles.content}>
-                
+
                 {/* Status Card */}
                 <View style={styles.card}>
                     <Text style={styles.cardTitle}>Status</Text>
@@ -127,7 +127,7 @@ const OrderDetailsScreen = ({ route, navigation }) => {
                 <View style={styles.card}>
                     <Text style={styles.cardTitle}>Package Details</Text>
                     <Text style={styles.description}>{order.package_description}</Text>
-                    <View style={styles.divider}/>
+                    <View style={styles.divider} />
                     <View style={styles.row}>
                         <Text style={styles.label}>Amount</Text>
                         <Text style={styles.amount}>₹{order.amount}</Text>
@@ -137,48 +137,45 @@ const OrderDetailsScreen = ({ route, navigation }) => {
                 {/* Location Details */}
                 <View style={styles.card}>
                     <Text style={styles.cardTitle}>Locations</Text>
-                    
+
                     <View style={styles.locationRow}>
-                         <View style={[styles.dot, { backgroundColor: '#4CD964' }]} />
-                         <View style={styles.locationTextContainer}>
-                             <Text style={styles.locationLabel}>Pickup</Text>
-                             <Text style={styles.address}>{order.pickup_address}</Text>
-                         </View>
+                        <View style={[styles.dot, { backgroundColor: '#4CD964' }]} />
+                        <View style={styles.locationTextContainer}>
+                            <Text style={styles.locationLabel}>Pickup</Text>
+                            <Text style={styles.address}>{order.pickup_address}</Text>
+                        </View>
                     </View>
 
                     <View style={styles.line} />
 
                     <View style={styles.locationRow}>
-                         <View style={[styles.dot, { backgroundColor: '#FF3B30' }]} />
-                         <View style={styles.detailRow}>
-							<Feather name="map-pin" size={20} color="#666" style={styles.icon} />
-							<View style={styles.detailTextContainer}>
-								<Text style={styles.detailLabel}>Delivery Address</Text>
-								<Text style={styles.detailValue}>{order.delivery_address}</Text>
-							</View>
-						</View>
+                        <View style={[styles.dot, { backgroundColor: '#FF3B30' }]} />
+                        <View style={styles.locationTextContainer}>
+                            <Text style={styles.locationLabel}>Delivery Address</Text>
+                            <Text style={styles.address}>{order.delivery_address}</Text>
+                        </View>
                     </View>
 
-                        {/* Delivery Partner Info - For Senders */}
-                        {userInfo.user_type === 'sender' && order.delivery_partner_id && (
-                             <View style={styles.partnerSection}>
-                                <Text style={styles.sectionTitle}>Delivery Agent</Text>
-                                <View style={styles.partnerCard}>
-                                    <View style={styles.partnerAvatar}>
-                                        <Text style={styles.partnerAvatarText}>
-                                            {order.delivery_partner_name?.charAt(0).toUpperCase() || 'D'}
-                                        </Text>
-                                    </View>
-                                    <View style={styles.partnerInfo}>
-                                        <Text style={styles.partnerName}>{order.delivery_partner_name || 'Delivery Partner'}</Text>
-                                        <Text style={styles.partnerPhone}>{order.delivery_partner_phone || 'No phone number'}</Text>
-                                    </View>
-                                    <TouchableOpacity style={styles.callButton}>
-                                        <Feather name="phone" size={20} color="white" />
-                                    </TouchableOpacity>
+                    {/* Delivery Partner Info - For Senders */}
+                    {userInfo.user_type === 'sender' && order.delivery_partner_id && (
+                        <View style={styles.partnerSection}>
+                            <Text style={styles.sectionTitle}>Delivery Agent</Text>
+                            <View style={styles.partnerCard}>
+                                <View style={styles.partnerAvatar}>
+                                    <Text style={styles.partnerAvatarText}>
+                                        {order.delivery_partner_name?.charAt(0).toUpperCase() || 'D'}
+                                    </Text>
                                 </View>
-                             </View>
-                        )}
+                                <View style={styles.partnerInfo}>
+                                    <Text style={styles.partnerName}>{order.delivery_partner_name || 'Delivery Partner'}</Text>
+                                    <Text style={styles.partnerPhone}>{order.delivery_partner_phone || 'No phone number'}</Text>
+                                </View>
+                                <TouchableOpacity style={styles.callButton} onPress={() => Linking.openURL(`tel:${order.delivery_partner_phone}`)}>
+                                    <Feather name="phone" size={20} color="white" />
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    )}
                 </View>
 
                 {/* Actions */}
@@ -187,9 +184,9 @@ const OrderDetailsScreen = ({ route, navigation }) => {
                         <Text style={styles.cancelButtonText}>Cancel Order</Text>
                     </TouchableOpacity>
                 )}
-                
+
                 {/* Delivery Partner Actions */}
-                 <View style={styles.actions}>
+                <View style={styles.actions}>
                     {getActionButtons()}
                 </View>
 
@@ -260,7 +257,7 @@ const styles = StyleSheet.create({
     statusBadge_in_transit: { backgroundColor: '#E5F0FF' },
     statusBadge_delivered: { backgroundColor: '#E5FFE9' },
     statusBadge_cancelled: { backgroundColor: '#FFE5E5' },
-    
+
     statusText: { fontWeight: 'bold', fontSize: 14 },
     statusText_pending: { color: '#FF9500' },
     statusText_assigned: { color: '#5AC8FA' },

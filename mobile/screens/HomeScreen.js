@@ -16,7 +16,14 @@ const HomeScreen = ({ navigation }) => {
 		try {
             // Fetch only active orders
 			const response = await client.get('/orders?type=active');
-			setOrders(response.data.orders);
+            
+            // Sort: in_transit -> assigned -> pending
+            const sortedOrders = response.data.orders.sort((a, b) => {
+                const manualOrder = { 'in_transit': 1, 'assigned': 2, 'pending': 3 };
+                return (manualOrder[a.status] || 99) - (manualOrder[b.status] || 99);
+            });
+
+			setOrders(sortedOrders);
 		} catch (error) {
 			console.log('Error fetching orders', error);
 		} finally {
@@ -30,17 +37,17 @@ const HomeScreen = ({ navigation }) => {
 		}, [])
 	);
 
-	const renderItem = ({ item }) => (
+	const renderItem = ({ item, index }) => (
 		<TouchableOpacity
 			style={styles.card}
-			onPress={() => navigation.navigate('OrderDetails', { orderId: item.id })}
+			onPress={() => navigation.navigate('OrderDetails', { orderId: item.id, displayId: index + 1 })}
             activeOpacity={0.9}
 		>
             <View style={styles.cardIndicator(item.status)} />
             <View style={styles.cardContent}>
                 <View style={styles.cardHeader}>
                     <View style={styles.orderIdBadge}>
-                         <Text style={styles.orderIdText}>#{item.id}</Text>
+                         <Text style={styles.orderIdText}>#{index + 1}</Text>
                     </View>
                     <View style={[styles.statusBadge, styles[`statusBadge_${item.status}`]]}>
                         <Text style={styles.statusText}>{item.status.replace('_', ' ').toUpperCase()}</Text>

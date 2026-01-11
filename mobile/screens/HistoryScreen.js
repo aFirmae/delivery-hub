@@ -29,14 +29,14 @@ const HistoryScreen = ({ navigation }) => {
         }, [])
     );
 
-    const renderItem = ({ item }) => (
+    const renderItem = ({ item, index }) => (
         <TouchableOpacity
             style={styles.card}
-            onPress={() => navigation.navigate('OrderDetails', { orderId: item.id })}
+            onPress={() => navigation.navigate('OrderDetails', { orderId: item.id, displayId: index + 1 })}
         >
             <View style={styles.cardHeader}>
-                <Text style={styles.orderId}>Order #{item.id}</Text>
-                <Text style={[styles.status, styles[`status_${item.status}`]]}>{item.status.toUpperCase()}</Text>
+                <Text style={styles.orderId}>Order #{index + 1}</Text>
+                <Text style={[styles.status, styles[`status_${item.status}`]]}>{item.status.replace('_', ' ').toUpperCase()}</Text>
             </View>
             <Text style={styles.date}>{new Date(item.created_at).toLocaleDateString()}</Text>
             <Text style={styles.desc} numberOfLines={1}>{item.package_description}</Text>

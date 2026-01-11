@@ -3,11 +3,17 @@ const db = require('../db/db');
 class Order {
   static async create(order) {
     const { sender_id, package_description, pickup_address, delivery_address, amount } = order;
+
+    // Generate custom ID: ORD + Random(5 chars) + Timestamp
+    const randomStr = Math.random().toString(36).substring(2, 7).toUpperCase();
+    const timestamp = Date.now().toString();
+    const id = `ORD${randomStr}${timestamp}`;
+
     const [result] = await db.execute(
-      'INSERT INTO orders (sender_id, package_description, pickup_address, delivery_address, amount, status) VALUES (?, ?, ?, ?, ?, ?)',
-      [sender_id, package_description, pickup_address, delivery_address, amount, 'pending']
+      'INSERT INTO orders (id, sender_id, package_description, pickup_address, delivery_address, amount, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [id, sender_id, package_description, pickup_address, delivery_address, amount, 'pending']
     );
-    return result.insertId;
+    return id;
   }
 
   static async findById(id) {
