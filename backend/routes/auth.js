@@ -10,8 +10,16 @@ router.post('/register', async (req, res) => {
 	try {
 		const { email, password, name, phone, user_type } = req.body;
 
-		if (!email || !password || !name) {
+		if (!email || !password || !name || !phone) {
 			return res.status(400).json({ message: 'Missing required fields' });
+		}
+
+		if (!email.includes('@')) {
+			return res.status(400).json({ message: 'Invalid email format' });
+		}
+
+		if (!/^\d{10}$/.test(phone)) {
+			return res.status(400).json({ message: 'Phone number must be exactly 10 digits' });
 		}
 
 		const existingUser = await User.findByEmail(email);
@@ -94,6 +102,10 @@ const auth = require('../middleware/auth');
 router.put('/profile', auth, async (req, res) => {
 	try {
 		const { name, phone } = req.body;
+
+		if (phone && !/^\d{10}$/.test(phone)) {
+			return res.status(400).json({ message: 'Phone number must be exactly 10 digits' });
+		}
 
 		const success = await User.update(req.user.id, { name, phone });
 		if (success) {
